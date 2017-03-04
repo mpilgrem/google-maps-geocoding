@@ -1,0 +1,3 @@
+# The Haskell Tool Stack related
+.stack-work/
+dist/
