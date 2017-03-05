@@ -11,14 +11,21 @@
 -- Maintainer  : public@pilgrem.com
 -- Stability   : experimental
 -- 
+-- This package has no connection with Google Inc. or its affiliates.
+-- 
 -- The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
 -- provides a direct way to access geocoding and reverse geocoding services via
--- an HTTP request.
+-- an HTTP request. This library provides bindings in Haskell to that API.
+--
+-- NB: The use of the Google Maps Geocoding API services is subject to the
+-- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>,
+-- which terms restrict the use of content (eg no use without a Google map). 
 --
 -- The 'components' and optional parameters in a geocoding request are not yet
 -- implemented. The reverse geocoding request is not yet implemented.
 --
--- Below is an example of use.
+-- The code below is an example console application to test privately the use of
+-- the library with the Google Maps Geocoding API.
 --
 -- > {-# LANGUAGE OverloadedStrings #-}
 -- >
@@ -34,17 +41,23 @@
 -- >
 -- > main :: IO ()
 -- > main = do
--- >     txt <- input "Enter full address: "
--- >     mgr <- newManager tlsManagerSettings
--- >     let apiKey = Key "<GOOGLE_API_KEY>"
--- >     result <- geocode mgr apiKey (Address txt)
--- >     case result of
--- >         Right response -> do
--- >             let s = status response
--- >             case s of
--- >                OK -> print $ location $ geometry $ head $ results response
--- >                 _  -> putStrLn $ "Error! Status: " ++ show s
--- >         _ -> putStrLn $ "Error! Result:\n" ++ show result
+-- >   putStrLn "A test of the Google Maps Geocoding API.\nNB: The use of the \
+-- >     \API services is subject to the Google Maps APIs Terms of Serivce at \
+-- >     \https://developers.google.com/maps/terms.\n"
+-- >   txt <- input "Enter ful address: "
+-- >   mgr <- newManager tlsManagerSettings
+-- >   let apiKey = Key "<REPLACE_THIS_WITH_YOUR_ACTUAL_GOOGLE_API_KEY>"
+-- >   result <- geocode mgr apiKey (Address txt)
+-- >   case result of
+-- >     Right response -> do
+-- >       let s = status response
+-- >       case s of
+-- >         OK -> do print $ location $ geometry $ head $ results response
+-- >                  putStrLn "Display the location by visiting \
+-- >                    \maps.google.com on the web and entering the latitude \
+-- >                    \and longitude."
+-- >         _  -> putStrLn $ "Error! Status: " ++ show s
+-- >     _ -> putStrLn $ "Error! Result:\n" ++ show result
 -- >
 -- > input :: Text -> IO Text
 -- > input msg = T.putStr msg >> hFlush stdout >> T.getLine
@@ -159,7 +172,7 @@ instance FromJSON AddressComponent where
             _ -> l
         }
 
--- | Postcode locality: a locality contained in a postal code
+-- | Postcode locality: a locality contained in a postal code.
 newtype PostcodeLocality = PostcodeLocality Text
     deriving (Eq, Show, Generic)
 
@@ -233,7 +246,8 @@ geocode' = client api
 googleApis :: BaseUrl
 googleApis = BaseUrl Https "maps.googleapis.com" 443 "/maps/api/geocode"
 
--- | Geocode
+-- | Geocode. NB: The use of the Google Maps Geocoding API services is subject
+-- to the <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
 geocode
     :: Manager
     -> Key
