@@ -31,72 +31,89 @@
 -- >
 -- > module Main (main) where
 -- >
+-- > import Data.Maybe (fromJust)
 -- > import Data.Text (Text)
 -- > import Data.Text.IO as T (getLine, putStr)
--- > import Network.HTTP.Client (newManager)
+-- > import Graphics.Gloss (Display (..), display, white)
+-- > import Graphics.Gloss.Juicy (fromDynamicImage)
+-- > import Network.HTTP.Client (Manager, newManager)
 -- > import Network.HTTP.Client.TLS (tlsManagerSettings)
 -- > import Web.Google.Maps.Geocoding (Address (..), geocode, GeocodingResponse (..),
 -- >     Geometry (..), Key (..), Location (..), Result (..), Status (..))
+-- > import Web.Google.Static.Maps (Center (..), Size (..), staticmap, Zoom (..))  
 -- > import System.IO (hFlush, stdout)
 -- >
 -- > main :: IO ()
 -- > main = do
--- >   putStrLn "A test of the Google Maps Geocoding API.\nNB: The use of the \
--- >     \API services is subject to the Google Maps APIs Terms of Serivce at \
--- >     \https://developers.google.com/maps/terms.\n"
--- >   txt <- input "Enter ful address: "
--- >   mgr <- newManager tlsManagerSettings
--- >   let apiKey = Key "<REPLACE_THIS_WITH_YOUR_ACTUAL_GOOGLE_API_KEY>"
--- >   result <- geocode mgr apiKey (Address txt)
--- >   case result of
--- >     Right response -> do
--- >       let s = status response
--- >       case s of
--- >         OK -> do print $ location $ geometry $ head $ results response
--- >                  putStrLn "Display the location by visiting \
--- >                    \maps.google.com on the web and entering the latitude \
--- >                    \and longitude."
--- >         _  -> putStrLn $ "Error! Status: " ++ show s
--- >     _ -> putStrLn $ "Error! Result:\n" ++ show result
+-- >     putStrLn "A test of the Google Maps Geocoding API.\nNB: The use of the \
+-- >         \API services is subject to the Google Maps APIs Terms of Serivce at \
+-- >         \https://developers.google.com/maps/terms.\n"
+-- >     txt <- input "Enter full address: "
+-- >     mgr <- newManager tlsManagerSettings
+-- >     let apiKey = Key "<REPLACE_THIS_WITH_YOUR_ACTUAL_GOOGLE_API_KEY>"
+-- >     result <- geocode mgr apiKey (Address txt)
+-- >     case result of
+-- >         Right response -> do
+-- >             let s = status response
+-- >             case s of
+-- >                 OK -> do
+-- >                     let center = Center $ location $ geometry $ head $
+-- >                             results response
+-- >                     print center
+-- >                     displayMap mgr apiKey center
+-- >                 _  -> putStrLn $ "Error! Status: " ++ show s
+-- >         _ -> putStrLn $ "Error! Result:\n" ++ show result
 -- >
 -- > input :: Text -> IO Text
 -- > input msg = T.putStr msg >> hFlush stdout >> T.getLine
+-- >
+-- > displayMap :: Manager -> Key -> Center -> IO ()
+-- > displayMap mgr apiKey center = do
+-- >     let zoom = Just $ Zoom 17
+-- >         w    = 400
+-- >         h    = 400
+-- >         size = Size w h
+-- >     result <- staticmap mgr apiKey Nothing (Just center) zoom size Nothing
+-- >         Nothing [] Nothing [] [] Nothing
+-- >     case result of
+-- >         Right response -> do
+-- >             let picture = fromJust $ fromDynamicImage response
+-- >                 title   = "Test Google Maps Geocoding API"
+-- >                 window  = InWindow title (w, h) (10, 10)
+-- >             display window white picture
+-- >         Left err -> putStrLn $ "Error while displaying map: " ++ show err
 module Web.Google.Maps.Geocoding
-       ( -- * Functions
-         geocode
-         -- * API
-       , GoogleMapsGeocodingAPI
-       , api
-         -- * Types
-       , Key                  (..)
-       , Address              (..)
-       , GeocodingResponse    (..)
-       , Status               (..)
-       , Result               (..)
-       , AddressType          (..)
-       , AddressComponent     (..)
-       , PostcodeLocality     (..)
-       , Geometry             (..)
-       , PlaceId              (..)
-       , Location             (..)
-       , LocationType         (..)
-       , Viewport             (..)
-       ) where
+    ( -- * Functions
+      geocode
+      -- * API
+    , GoogleMapsGeocodingAPI
+    , api
+      -- * Types
+    , Key                  (..)
+    , Address              (..)
+    , GeocodingResponse    (..)
+    , Status               (..)
+    , Result               (..)
+    , AddressType          (..)
+    , AddressComponent     (..)
+    , PostcodeLocality     (..)
+    , Geometry             (..)
+    , PlaceId              (..)
+    , Location             (..)
+    , LocationType         (..)
+    , Viewport             (..)
+    ) where
 
-import           Data.Aeson hiding (Result)
-import           Data.Aeson.Types (Options (..))
-import           Data.Foldable (asum)
-import           Data.Proxy
-import           Data.Text (Text)
+import Data.Aeson hiding (Result)
+import Data.Aeson.Types (Options (..))
+import Data.Proxy
+import Data.Text (Text)
 import qualified Data.Text as T (unpack)
-import           GHC.Generics
-import           Network.HTTP.Client (Manager)
-import           Servant.API
-import           Servant.Client
-
--- | API key
-newtype Key = Key Text
-    deriving (Eq, Show, ToHttpApiData)
+import GHC.Generics (Generic)
+import Network.HTTP.Client (Manager)
+import Servant.API
+import Servant.Client
+import Web.Google.Maps.Common (googleMapsApis, Key (..), Location (..))
 
 -- | Address
 newtype Address = Address Text
@@ -188,14 +205,6 @@ data Geometry = Geometry
 
 instance FromJSON Geometry
 
--- | Location
-data Location = Location
-    { lat :: Double
-    , lng :: Double
-    } deriving (Eq, Show, Generic)
-
-instance FromJSON Location
-
 -- | Location type
 data LocationType
     = Rooftop
@@ -228,7 +237,8 @@ instance FromJSON PlaceId
 
 -- | Google Translate API
 type GoogleMapsGeocodingAPI
-    =  "json"
+    =  "geocode"
+    :> "json"
     :> QueryParam "key" Key
     :> QueryParam "address" Address
     :> Get '[JSON] GeocodingResponse
@@ -243,9 +253,6 @@ geocode'
     -> ClientM GeocodingResponse
 geocode' = client api
 
-googleApis :: BaseUrl
-googleApis = BaseUrl Https "maps.googleapis.com" 443 "/maps/api/geocode"
-
 -- | Geocode. NB: The use of the Google Maps Geocoding API services is subject
 -- to the <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
 geocode
@@ -254,4 +261,5 @@ geocode
     -> Address
     -> IO (Either ServantError GeocodingResponse)
 geocode mgr key address =
-    runClientM (geocode' (Just key) (Just address)) (ClientEnv mgr googleApis)
+    runClientM (geocode' (Just key) (Just address))
+               (ClientEnv mgr googleMapsApis)
