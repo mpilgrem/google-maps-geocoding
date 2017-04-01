@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TypeOperators              #-}
@@ -21,9 +22,6 @@
 -- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>,
 -- which terms restrict the use of content (eg no use without a Google map). 
 --
--- The 'components' and optional parameters in a geocoding request are not yet
--- implemented. The reverse geocoding request is not yet implemented.
---
 -- The code below is an example console application to test privately the use of
 -- the library with the Google Maps Geocoding API.
 --
@@ -39,8 +37,9 @@
 -- > import Network.HTTP.Client (Manager, newManager)
 -- > import Network.HTTP.Client.TLS (tlsManagerSettings)
 -- > import Web.Google.Maps.Geocoding (Address (..), geocode, GeocodingResponse (..),
--- >     Geometry (..), Key (..), Location (..), Result (..), Status (..))
--- > import Web.Google.Static.Maps (Center (..), Size (..), staticmap, Zoom (..))  
+-- >     Geometry (..), Key (..), LatLng (..), Result (..), Status (..))
+-- > import Web.Google.Static.Maps (Center (..), Location (..), Size (..),
+-- >     staticmap, Zoom (..))  
 -- > import System.IO (hFlush, stdout)
 -- >
 -- > main :: IO ()
@@ -51,14 +50,16 @@
 -- >     txt <- input "Enter full address: "
 -- >     mgr <- newManager tlsManagerSettings
 -- >     let apiKey = Key "<REPLACE_THIS_WITH_YOUR_ACTUAL_GOOGLE_API_KEY>"
--- >     result <- geocode mgr apiKey (Address txt)
+-- >     result <- geocode mgr apiKey (Just $ Address txt) Nothing Nothing
+-- >         Nothing Nothing
 -- >     case result of
 -- >         Right response -> do
 -- >             let s = status response
 -- >             case s of
 -- >                 OK -> do
--- >                     let center = Center $ location $ geometry $ head $
--- >                             results response
+-- >                     let latlng = location $ geometry $ head $ results
+-- >                             response
+-- >                         center = Center $ Coord latlng
 -- >                     print center
 -- >                     displayMap mgr apiKey center
 -- >                 _  -> putStrLn $ "Error! Status: " ++ show s
@@ -85,12 +86,17 @@
 module Web.Google.Maps.Geocoding
     ( -- * Functions
       geocode
+    , backGeocode
       -- * API
     , GoogleMapsGeocodingAPI
     , api
       -- * Types
     , Key                  (..)
     , Address              (..)
+    , FilterComponent      (..)
+    , Viewport             (..)
+    , Language             (..)
+    , Region               (..)
     , GeocodingResponse    (..)
     , Status               (..)
     , Result               (..)
@@ -98,26 +104,51 @@ module Web.Google.Maps.Geocoding
     , AddressComponent     (..)
     , PostcodeLocality     (..)
     , Geometry             (..)
+    , LatLng               (..)
     , PlaceId              (..)
     , Location             (..)
     , LocationType         (..)
-    , Viewport             (..)
     ) where
 
 import Data.Aeson hiding (Result)
 import Data.Aeson.Types (Options (..))
+import Data.List (intersperse)
 import Data.Proxy
 import Data.Text (Text)
-import qualified Data.Text as T (unpack)
+import qualified Data.Text as T (concat, unpack)
 import GHC.Generics (Generic)
 import Network.HTTP.Client (Manager)
 import Servant.API
 import Servant.Client
-import Web.Google.Maps.Common (googleMapsApis, Key (..), Location (..))
+import Web.Google.Maps.Common (Address (..), googleMapsApis, Key (..),
+    Language (..), LatLng (..), Location (..), Region (..))
 
--- | Address
-newtype Address = Address Text
-    deriving (Eq, Show, ToHttpApiData)
+-- | Fliter component: a component that can be used to filter the results
+-- returned in a geocoding response.
+data FilterComponent
+    = Route Text
+    | Locality Text
+    | AdministrativeArea Text
+    | PostalCode Text
+    | Country Region
+    deriving (Eq, Show)
+
+instance ToHttpApiData FilterComponent where
+    toUrlPiece filterComponent
+        | Route route <- filterComponent
+          = T.concat ["route:", route]
+        | Locality locality <- filterComponent
+          = T.concat ["locality:", locality]
+        | AdministrativeArea adminArea <- filterComponent
+          = T.concat ["administrative_area:", adminArea]
+        | PostalCode postalCode <- filterComponent
+          = T.concat ["postal_code:", postalCode]
+        | Country country <- filterComponent
+          = T.concat ["country:", toUrlPiece country]
+
+instance ToHttpApiData [FilterComponent] where
+    toUrlPiece [] = ""
+    toUrlPiece cs = T.concat $ intersperse "|" $ map toUrlPiece cs
 
 -- | Geocoding Reponse
 data GeocodingResponse = GeocodingResponse
@@ -170,8 +201,8 @@ instance FromJSON Result
 
 -- | Address (and address component) type: The list of types provided by Google
 -- (as at 4 March 2017) is incomplete.
-data AddressType = AddressType Text
-    deriving (Eq, Show, Generic)
+newtype AddressType = AddressType Text
+    deriving (Eq, Show, Generic, ToHttpApiData)
 
 instance FromJSON AddressType
 
@@ -197,7 +228,7 @@ instance FromJSON PostcodeLocality
 
 -- | Geometry
 data Geometry = Geometry
-    { location :: Location
+    { location :: LatLng
     , location_type :: LocationType
     , viewport :: Viewport
     , bounds :: Maybe Viewport
@@ -213,6 +244,13 @@ data LocationType
     | Approximate
     deriving (Eq, Show)
 
+instance ToHttpApiData LocationType where
+    toUrlPiece locationType = case locationType of
+        Rooftop           -> "ROOFTOP"
+        RangeInterpolated -> "RANGE_INTERPOLATED"
+        GeometricCenter   -> "GEOMETRIC_CENTER"
+        Approximate       -> "APPROXIMATE"
+
 instance FromJSON LocationType where
     parseJSON = withText "LocationType" $ \t -> case t of
         "ROOFTOP"            -> return Rooftop
@@ -223,25 +261,41 @@ instance FromJSON LocationType where
 
 -- | Viewport
 data Viewport = Viewport
-    { southwest :: Location
-    , northeast :: Location
+    { southwest :: LatLng
+    , northeast :: LatLng
     } deriving (Eq, Show, Generic)
+
+instance ToHttpApiData Viewport where
+    toUrlPiece (Viewport sw ne) = T.concat [toUrlPiece sw, "|", toUrlPiece ne]
 
 instance FromJSON Viewport
 
 -- | Place id
 newtype PlaceId = PlaceId Text
-    deriving (Eq, Show, Generic)
+    deriving (Eq, Show, Generic, ToHttpApiData)
 
 instance FromJSON PlaceId
 
 -- | Google Translate API
 type GoogleMapsGeocodingAPI
-    =  "geocode"
-    :> "json"
-    :> QueryParam "key" Key
-    :> QueryParam "address" Address
-    :> Get '[JSON] GeocodingResponse
+    =    "geocode"
+    :>   "json"
+    :>   QueryParam "key"           Key
+    :>   QueryParam "address"       Address
+    :>   QueryParam "components"    [FilterComponent]
+    :>   QueryParam "bounds"        Viewport
+    :>   QueryParam "language"      Language
+    :>   QueryParam "region"        Region
+    :>   Get '[JSON] GeocodingResponse
+    :<|> "geocode" 
+    :>   "json"
+    :>   QueryParam "key"           Key
+    :>   QueryParam "latlng"        LatLng
+    :>   QueryParam "place_id"      PlaceId
+    :>   QueryParam "result_type"   AddressType
+    :>   QueryParam "location_type" LocationType
+    :>   QueryParam "language"      Language
+    :>   Get '[JSON] GeocodingResponse
 
 -- | API type
 api :: Proxy GoogleMapsGeocodingAPI
@@ -250,16 +304,62 @@ api = Proxy
 geocode'
     :: Maybe Key
     -> Maybe Address
+    -> Maybe [FilterComponent]
+    -> Maybe Viewport
+    -> Maybe Language
+    -> Maybe Region
     -> ClientM GeocodingResponse
-geocode' = client api
+backGeocode'
+    :: Maybe Key
+    -> Maybe LatLng
+    -> Maybe PlaceId
+    -> Maybe AddressType
+    -> Maybe LocationType
+    -> Maybe Language
+    -> ClientM GeocodingResponse
+geocode' :<|> backGeocode' = client api
 
 -- | Geocode. NB: The use of the Google Maps Geocoding API services is subject
 -- to the <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
 geocode
     :: Manager
     -> Key
-    -> Address
+    -> Maybe Address
+    -> Maybe [FilterComponent]
+    -> Maybe Viewport
+    -> Maybe Language
+    -> Maybe Region
     -> IO (Either ServantError GeocodingResponse)
-geocode mgr key address =
-    runClientM (geocode' (Just key) (Just address))
-               (ClientEnv mgr googleMapsApis)
+geocode
+    mgr
+    key
+    addressOpt
+    filterComponentsOpt
+    viewportOpt
+    languageOpt
+    regionOpt
+    = runClientM (geocode' (Just key) addressOpt filterComponentsOpt viewportOpt
+          languageOpt regionOpt) (ClientEnv mgr googleMapsApis)
+
+-- | Reverse (back) geocode. NB: The use of the Google Maps Geocoding API
+-- services is subject to the
+-- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
+backGeocode
+    :: Manager
+    -> Key
+    -> Maybe LatLng
+    -> Maybe PlaceId
+    -> Maybe AddressType
+    -> Maybe LocationType
+    -> Maybe Language
+    -> IO (Either ServantError GeocodingResponse)
+backGeocode
+    mgr
+    key
+    latLngOpt
+    placeIdOpt
+    addressTypeOpt
+    locationTypeOpt
+    languageOpt
+    = runClientM (backGeocode' (Just key) latLngOpt placeIdOpt addressTypeOpt
+          locationTypeOpt languageOpt) (ClientEnv mgr googleMapsApis)

@@ -1,3 +1,11 @@
+# 0.3.0.0
+
+* Implement reverse (back) geocoding (`backGeocode`)
+
+* Implement `components`, `bounds`, `language` and `region` optional parameters
+
+* Change latitude/longitude type to `LatLng` from `Location`
+
 # 0.2.0.0
 
 * Move `geocode` from the end of the base URL to the start of the API type
