@@ -1,5 +1,5 @@
 name:                google-maps-geocoding
-version:             0.3.0.0
+version:             0.4.0.0
 synopsis:            Google Maps Geocoding API bindings
 description:         The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
                      provides a direct way to access geocoding and reverse
@@ -29,11 +29,11 @@ library
   hs-source-dirs:      src
   exposed-modules:     Web.Google.Maps.Geocoding
   build-depends:       base >= 4.7 && < 5
-                     , aeson >= 1.0 && < 1.1
-                     , google-static-maps >= 0.4 && < 0.5
+                     , aeson >= 1.1 && < 1.2
+                     , google-static-maps >= 0.5 && < 0.6
                      , http-client >= 0.5 && < 0.6
-                     , servant >= 0.9 && < 0.10
-                     , servant-client >= 0.9 && <0.10
+                     , servant >= 0.11 && < 0.12
+                     , servant-client >= 0.11 && <0.12
                      , text >= 1.2 && < 1.3
   default-language:    Haskell2010
 
