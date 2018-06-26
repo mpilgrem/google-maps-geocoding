@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE FlexibleInstances          #-}
@@ -11,16 +12,16 @@
 -- Copyright   : (c) Mike Pilgrem 2017
 -- Maintainer  : public@pilgrem.com
 -- Stability   : experimental
--- 
+--
 -- This package has no connection with Google Inc. or its affiliates.
--- 
+--
 -- The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
 -- provides a direct way to access geocoding and reverse geocoding services via
 -- an HTTP request. This library provides bindings in Haskell to that API.
 --
 -- NB: The use of the Google Maps Geocoding API services is subject to the
 -- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>,
--- which terms restrict the use of content (eg no use without a Google map). 
+-- which terms restrict the use of content (eg no use without a Google map).
 --
 -- The code below is an example console application to test privately the use of
 -- the library with the Google Maps Geocoding API.
@@ -39,7 +40,7 @@
 -- > import Web.Google.Maps.Geocoding (Address (..), geocode, GeocodingResponse (..),
 -- >     Geometry (..), Key (..), LatLng (..), Result (..), Status (..))
 -- > import Web.Google.Static.Maps (Center (..), Location (..), Size (..),
--- >     staticmap, Zoom (..))  
+-- >     staticmap, Zoom (..))
 -- > import System.IO (hFlush, stdout)
 -- >
 -- > main :: IO ()
@@ -287,7 +288,7 @@ type GoogleMapsGeocodingAPI
     :>   QueryParam "language"      Language
     :>   QueryParam "region"        Region
     :>   Get '[JSON] GeocodingResponse
-    :<|> "geocode" 
+    :<|> "geocode"
     :>   "json"
     :>   QueryParam "key"           Key
     :>   QueryParam "latlng"        LatLng
@@ -339,7 +340,13 @@ geocode
     languageOpt
     regionOpt
     = runClientM (geocode' (Just key) addressOpt filterComponentsOpt viewportOpt
-          languageOpt regionOpt) (ClientEnv mgr googleMapsApis)
+          languageOpt regionOpt)
+-- CookieJar supported from servant-client-0.13
+#if MIN_VERSION_servant_client(0,13,0)
+          (ClientEnv mgr googleMapsApis Nothing)
+#else
+          (ClientEnv mgr googleMapsApis)
+#endif
 
 -- | Reverse (back) geocode. NB: The use of the Google Maps Geocoding API
 -- services is subject to the
@@ -362,4 +369,10 @@ backGeocode
     locationTypeOpt
     languageOpt
     = runClientM (backGeocode' (Just key) latLngOpt placeIdOpt addressTypeOpt
-          locationTypeOpt languageOpt) (ClientEnv mgr googleMapsApis)
+          locationTypeOpt languageOpt)
+-- CookieJar supported from servant-client-0.13
+#if MIN_VERSION_servant_client(0,13,0)
+          (ClientEnv mgr googleMapsApis Nothing)
+#else
+          (ClientEnv mgr googleMapsApis)
+#endif
