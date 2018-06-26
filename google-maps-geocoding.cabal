@@ -1,5 +1,5 @@
 name:                google-maps-geocoding
-version:             0.4.0.0
+version:             0.4.0.1
 synopsis:            Google Maps Geocoding API bindings
 description:         The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
                      provides a direct way to access geocoding and reverse

@@ -1,7 +1,11 @@
+# 0.4.0.1
+
+* Update dependencies for GHC 8.4.3
+
 # 0.4.0.0
 
 * Depend on more recent version of `google-static-maps` and `servant` packages
-  and, consequently, `servant-client` and `aeson` packages 
+  and, consequently, `servant-client` and `aeson` packages
 
 # 0.3.0.0
 
