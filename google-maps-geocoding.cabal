@@ -1,15 +1,21 @@
 name:                google-maps-geocoding
-version:             0.4.0.2
-synopsis:            Google Maps Geocoding API bindings
-description:         The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
+version:             0.5.0.0
+synopsis:            Bindings to the Google Geocoding API (formerly Maps
+                     Geocoding API)
+description:         The
+                     <https://developers.google.com/maps/documentation/geocoding/intro Google Geocoding API>
                      provides a direct way to access geocoding and reverse
                      geocoding services via an HTTP request. This library
                      package provides bindings in Haskell to that API.
                      .
                      NB: The use of the API's services is subject to the
-                     <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>,
-                     which terms restrict the use of content (eg no use without
-                     a Google map).
+                     <https://cloud.google.com/maps-platform/terms/ Google Maps Platform Terms of Service>,
+                     which terms restrict the use of content. End Users’ use of
+                     Google Maps is subject to the then-current Google
+                     Maps/Google Earth Additional Terms of Service at
+                     <https://maps.google.com/help/terms_maps.html> and Google
+                     Privacy Policy at
+                     <https://www.google.com/policies/privacy/>.
                      .
                      This package has no connection with Google Inc. or its
                      affiliates.
@@ -30,7 +36,7 @@ library
   exposed-modules:     Web.Google.Maps.Geocoding
   build-depends:       base >= 4.8 && < 4.13
                      , aeson >= 1.1 && < 1.5
-                     , google-static-maps >= 0.5 && < 0.6
+                     , google-static-maps >= 0.6 && < 0.7
                      , http-client >= 0.5 && < 0.6
                      , servant >= 0.11 && < 0.15
                      , servant-client >= 0.11 && < 0.15

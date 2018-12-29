@@ -1,3 +1,10 @@
+# 0.5.0.0
+
+* Update documentation to reflect changes to Google Maps Platform
+
+* Rename module `Web.Google.Maps.Geocoding` as `Web.Google.Geocoding` and
+  `GoogleMapsGeocodingAPI` as `GoogleGeocodingAPI`
+
 # 0.4.0.2
 
 * Update dependencies for GHC 8.6.1

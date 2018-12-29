@@ -7,9 +7,10 @@
 {-# LANGUAGE TypeOperators              #-}
 
 -- |
--- Module      : Web.Google.Maps.Geocoding
--- Description : Bindings to the Google Maps Geocoding API
--- Copyright   : (c) Mike Pilgrem 2017
+-- Module      : Web.Google.Geocoding
+-- Description : Bindings to the Google Geocoding API (formerly Maps Geocoding
+--               API)
+-- Copyright   : (c) Mike Pilgrem 2017, 2018
 -- Maintainer  : public@pilgrem.com
 -- Stability   : experimental
 --
@@ -19,12 +20,15 @@
 -- provides a direct way to access geocoding and reverse geocoding services via
 -- an HTTP request. This library provides bindings in Haskell to that API.
 --
--- NB: The use of the Google Maps Geocoding API services is subject to the
--- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>,
--- which terms restrict the use of content (eg no use without a Google map).
+-- NB: The use of the Google Geocoding API services is subject to the
+-- <https://cloud.google.com/maps-platform/terms/ Google Maps Platform Terms of Service>,
+-- which terms restrict the use of content. End Users’ use of Google Maps is
+-- subject to the then-current Google Maps/Google Earth Additional Terms of
+-- Service at <https://maps.google.com/help/terms_maps.html> and Google Privacy
+-- Policy at <https://www.google.com/policies/privacy/>.
 --
 -- The code below is an example console application to test privately the use of
--- the library with the Google Maps Geocoding API.
+-- the library with the Google Geocoding API.
 --
 -- > {-# LANGUAGE OverloadedStrings #-}
 -- >
@@ -37,17 +41,17 @@
 -- > import Graphics.Gloss.Juicy (fromDynamicImage)
 -- > import Network.HTTP.Client (Manager, newManager)
 -- > import Network.HTTP.Client.TLS (tlsManagerSettings)
--- > import Web.Google.Maps.Geocoding (Address (..), geocode, GeocodingResponse (..),
+-- > import Web.Google.Geocoding (Address (..), geocode, GeocodingResponse (..),
 -- >   Geometry (..), Key (..), LatLng (..), Result (..), Status (..))
--- > import Web.Google.Static.Maps (Center (..), Location (..), Size (..),
+-- > import Web.Google.Maps.Static (Center (..), Location (..), Size (..),
 -- >   staticmap, Zoom (..))
 -- > import System.IO (hFlush, stdout)
 -- >
 -- > main :: IO ()
 -- > main = do
--- >   putStrLn $ "A test of the Google Maps Geocoding API.\nNB: The use of " ++
--- >     "the API services is subject to the Google Maps APIs Terms of " ++
--- >     "Serivce at https://developers.google.com/maps/terms.\n"
+-- >   putStrLn $ "A test of the Google Geocoding API.\nNB: The use of " ++
+-- >     "the API services is subject to the Google Maps Platform Terms of " ++
+-- >     "Serivce at https://cloud.google.com/maps-platform/terms/.\n"
 -- >   txt <- input "Enter full address: "
 -- >   mgr <- newManager tlsManagerSettings
 -- >   let apiKey = Key "<REPLACE_THIS_WITH_YOUR_ACTUAL_GOOGLE_API_KEY>"
@@ -79,16 +83,16 @@
 -- >   case result of
 -- >     Right response -> do
 -- >       let picture = fromJust $ fromDynamicImage response
--- >           title   = "Test Google Maps Geocoding API"
+-- >           title   = "Test Google Geocoding API"
 -- >           window  = InWindow title (w, h) (10, 10)
 -- >       display window white picture
 -- >     Left err -> putStrLn $ "Error while displaying map: " ++ show err
-module Web.Google.Maps.Geocoding
+module Web.Google.Geocoding
     ( -- * Functions
       geocode
     , backGeocode
       -- * API
-    , GoogleMapsGeocodingAPI
+    , GoogleGeocodingAPI
     , api
       -- * Types
     , Key                  (..)
@@ -276,8 +280,8 @@ newtype PlaceId = PlaceId Text
 
 instance FromJSON PlaceId
 
--- | Google Translate API
-type GoogleMapsGeocodingAPI
+-- | Google Geocoding API
+type GoogleGeocodingAPI
     =    "geocode"
     :>   "json"
     :>   QueryParam "key"           Key
@@ -298,7 +302,7 @@ type GoogleMapsGeocodingAPI
     :>   Get '[JSON] GeocodingResponse
 
 -- | API type
-api :: Proxy GoogleMapsGeocodingAPI
+api :: Proxy GoogleGeocodingAPI
 api = Proxy
 
 geocode'
@@ -319,8 +323,12 @@ backGeocode'
     -> ClientM GeocodingResponse
 geocode' :<|> backGeocode' = client api
 
--- | Geocode. NB: The use of the Google Maps Geocoding API services is subject
--- to the <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
+-- | Geocode. NB: The use of the Google Geocoding API services is subject to the
+-- <https://cloud.google.com/maps-platform/terms/ Google Maps Platform Terms of Service>.
+--  End Users’ use of Google Maps is subject to the then-current Google
+-- Maps/Google Earth Additional Terms of Service at
+-- <https://maps.google.com/help/terms_maps.html> and Google Privacy Policy at
+-- <https://www.google.com/policies/privacy/>.
 geocode
     :: Manager
     -> Key
@@ -347,9 +355,13 @@ geocode
           (ClientEnv mgr googleMapsApis)
 #endif
 
--- | Reverse (back) geocode. NB: The use of the Google Maps Geocoding API
--- services is subject to the
+-- | Reverse (back) geocode. NB: The use of the Google Geocoding API services is
+-- subject to the
 -- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
+-- End Users’ use of Google Maps is subject to the then-current Google
+-- Maps/Google Earth Additional Terms of Service at
+-- <https://maps.google.com/help/terms_maps.html> and Google Privacy Policy at
+-- <https://www.google.com/policies/privacy/>.
 backGeocode
     :: Manager
     -> Key
