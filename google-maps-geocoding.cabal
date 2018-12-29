@@ -33,13 +33,13 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Web.Google.Maps.Geocoding
+  exposed-modules:     Web.Google.Geocoding
   build-depends:       base >= 4.8 && < 4.13
                      , aeson >= 1.1 && < 1.5
                      , google-static-maps >= 0.6 && < 0.7
                      , http-client >= 0.5 && < 0.6
-                     , servant >= 0.11 && < 0.15
-                     , servant-client >= 0.11 && < 0.15
+                     , servant >= 0.11 && < 0.16
+                     , servant-client >= 0.11 && < 0.16
                      , text >= 1.2 && < 1.3
   default-language:    Haskell2010
 

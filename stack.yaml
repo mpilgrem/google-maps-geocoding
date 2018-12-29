@@ -1,8 +1,13 @@
-resolver: nightly-2018-11-02
+resolver: nightly-2018-12-17
 packages:
 - '.'
 extra-deps:
 - google-static-maps-0.6.0.0
-- servant-JuicyPixels-0.3.0.4
+- http-api-data-0.4
+- QuickCheck-2.12.6.1
+- servant-0.15
+- servant-client-0.15
+- servant-client-core-0.15
+- servant-server-0.15
 flags: {}
 extra-package-dbs: []

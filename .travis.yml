@@ -39,9 +39,9 @@ matrix:
   - env: BUILD=cabal GHCVER=8.4.4 CABALVER=2.2
     compiler: ": #GHC 8.4.4"
     addons: {apt: {packages: [cabal-install-2.2,ghc-8.4.4], sources: [hvr-ghc]}}
-  - env: BUILD=cabal GHCVER=8.6.1 CABALVER=2.4
-    compiler: ": #GHC 8.6.1"
-    addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.1], sources: [hvr-ghc]}}
+  - env: BUILD=cabal GHCVER=8.6.2 CABALVER=2.4
+    compiler: ": #GHC 8.6.2"
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.2], sources: [hvr-ghc]}}
 
   # Build with the newest GHC and cabal-install. This is an accepted failure,
   # see below.
@@ -51,8 +51,8 @@ matrix:
 
   # The Stack builds. We can pass in arbitrary Stack arguments via the ARGS
   # variable, such as using --stack-yaml to point to a different file.
-  - env: BUILD=stack ARGS="--resolver lts-12"
-    compiler: ": #stack 8.4.4"
+  - env: BUILD=stack ARGS="--resolver nightly-2018-12-17"
+    compiler: ": #stack 8.6.2"
     addons: {apt: {packages: [libgmp-dev]}}
 
   # Nightly builds are allowed to fail

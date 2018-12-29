@@ -16,7 +16,7 @@
 --
 -- This package has no connection with Google Inc. or its affiliates.
 --
--- The <https://developers.google.com/maps/documentation/geocoding/intro Google Maps Geocoding API>
+-- The <https://developers.google.com/maps/documentation/geocoding/intro Google Geocoding API>
 -- provides a direct way to access geocoding and reverse geocoding services via
 -- an HTTP request. This library provides bindings in Haskell to that API.
 --
@@ -325,7 +325,7 @@ geocode' :<|> backGeocode' = client api
 
 -- | Geocode. NB: The use of the Google Geocoding API services is subject to the
 -- <https://cloud.google.com/maps-platform/terms/ Google Maps Platform Terms of Service>.
---  End Users’ use of Google Maps is subject to the then-current Google
+-- End Users’ use of Google Maps is subject to the then-current Google
 -- Maps/Google Earth Additional Terms of Service at
 -- <https://maps.google.com/help/terms_maps.html> and Google Privacy Policy at
 -- <https://www.google.com/policies/privacy/>.
@@ -357,7 +357,7 @@ geocode
 
 -- | Reverse (back) geocode. NB: The use of the Google Geocoding API services is
 -- subject to the
--- <https://developers.google.com/maps/terms Google Maps APIs Terms of Service>.
+-- <https://cloud.google.com/maps-platform/terms/ Google Maps Platform Terms of Service>.
 -- End Users’ use of Google Maps is subject to the then-current Google
 -- Maps/Google Earth Additional Terms of Service at
 -- <https://maps.google.com/help/terms_maps.html> and Google Privacy Policy at

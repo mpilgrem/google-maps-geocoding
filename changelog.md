@@ -5,6 +5,8 @@
 * Rename module `Web.Google.Maps.Geocoding` as `Web.Google.Geocoding` and
   `GoogleMapsGeocodingAPI` as `GoogleGeocodingAPI`
 
+* Update dependencies for GHC 8.6.2 and revisit upper bounds
+
 # 0.4.0.2
 
 * Update dependencies for GHC 8.6.1
