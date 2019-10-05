@@ -1,6 +1,7 @@
 # The Haskell Tool Stack related
 .stack-work/
 dist/
+stack.yaml.lock
 
 # Haddock related
 docs/

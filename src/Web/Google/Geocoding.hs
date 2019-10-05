@@ -337,7 +337,7 @@ geocode
     -> Maybe Viewport
     -> Maybe Language
     -> Maybe Region
-    -> IO (Either ServantError GeocodingResponse)
+    -> IO (Either ClientError GeocodingResponse)
 geocode
     mgr
     key
@@ -370,7 +370,7 @@ backGeocode
     -> Maybe AddressType
     -> Maybe LocationType
     -> Maybe Language
-    -> IO (Either ServantError GeocodingResponse)
+    -> IO (Either ClientError GeocodingResponse)
 backGeocode
     mgr
     key
