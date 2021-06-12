@@ -1,5 +1,6 @@
-resolver: nightly-2019-10-05
+resolver: lts-17.15
 packages:
 - '.'
 extra-deps:
-- google-static-maps-0.6.0.1@sha256:b850c578bed93abad89e023196cbec9f7f9a3c6cdd73ae2afbe7a7ded6b6d8bc,2725
+- google-static-maps-0.7.0.0@sha256:d73b67f9cc59e442e029fd7e87ab256df15a4b38ddef58482d7b7a837108bd1f,2755
+- servant-JuicyPixels-0.3.0.6@sha256:0c2e27ad5e472b1062da07d9d2e6eceb77e96bef43a305f35e5644edc4ced676,1311

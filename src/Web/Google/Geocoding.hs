@@ -114,18 +114,23 @@ module Web.Google.Geocoding
     , LocationType         (..)
     ) where
 
-import Data.Aeson hiding (Result)
-import Data.Aeson.Types (Options (..))
+import Data.Aeson (FromJSON (parseJSON), Options (fieldLabelModifier),
+    defaultOptions, genericParseJSON, withText)
 import Data.List (intersperse)
-import Data.Proxy
+import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import qualified Data.Text as T (concat, unpack)
 import GHC.Generics (Generic)
 import Network.HTTP.Client (Manager)
-import Servant.API
-import Servant.Client
-import Web.Google.Maps.Common (Address (..), googleMapsApis, Key (..),
-    Language (..), LatLng (..), Location (..), Region (..))
+import Servant.API (type (:<|>) (..), type (:>), Get, JSON, QueryParam,
+    ToHttpApiData (toUrlPiece))
+import Servant.Client (ClientError, ClientEnv (ClientEnv), ClientM, client,
+    runClientM)
+#if MIN_VERSION_servant_client(0,17,0)
+import Servant.Client (defaultMakeClientRequest)
+#endif
+import Web.Google.Maps.Common (Address (..), Key (..), Language (..),
+    LatLng (..), Location (..), Region (..), googleMapsApis)
 
 -- | Fliter component: a component that can be used to filter the results
 -- returned in a geocoding response.
@@ -348,8 +353,11 @@ geocode
     regionOpt
     = runClientM (geocode' (Just key) addressOpt filterComponentsOpt viewportOpt
           languageOpt regionOpt)
+-- makeClientRequest supported from servant-client-0.17
+#if MIN_VERSION_servant_client(0,17,0)
+          (ClientEnv mgr googleMapsApis Nothing defaultMakeClientRequest)
 -- CookieJar supported from servant-client-0.13
-#if MIN_VERSION_servant_client(0,13,0)
+#elif MIN_VERSION_servant_client(0,13,0)
           (ClientEnv mgr googleMapsApis Nothing)
 #else
           (ClientEnv mgr googleMapsApis)
@@ -381,8 +389,11 @@ backGeocode
     languageOpt
     = runClientM (backGeocode' (Just key) latLngOpt placeIdOpt addressTypeOpt
           locationTypeOpt languageOpt)
+-- makeClientRequest supported from servant-client-0.17
+#if MIN_VERSION_servant_client(0,17,0)
+          (ClientEnv mgr googleMapsApis Nothing defaultMakeClientRequest)
 -- CookieJar supported from servant-client-0.13
-#if MIN_VERSION_servant_client(0,13,0)
+#elif MIN_VERSION_servant_client(0,13,0)
           (ClientEnv mgr googleMapsApis Nothing)
 #else
           (ClientEnv mgr googleMapsApis)
