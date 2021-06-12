@@ -1,4 +1,4 @@
-# google-maps-geocoding
+# google-maps-geocoding [![GitHub CI](https://github.com/mpilgrem/google-maps-geocoding/workflows/CI/badge.svg)](https://github.com/mpilgrem/google-maps-geocoding/actions)
 Haskell bindings to the Google Geocoding API (formerly Maps Geocoding API)
 
 This respository has no connection with Google Inc. or its affiliates.
