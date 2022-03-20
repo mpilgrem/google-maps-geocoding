@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types:
       - opened
@@ -13,17 +13,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cabal: ["3.2"]
+        cabal: ["3.6"]
         ghc:
-          - "8.0.2"
-          - "8.2.2"
-          - "8.4.4"
-          - "8.6.5"
           - "8.8.4"
-          - "8.10.4"
+          - "8.10.7"
+          - "9.0.2"
     steps:
       - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v1.2.7
         id: setup-haskell-cabal
         with:
           ghc-version: ${{ matrix.ghc }}
@@ -44,17 +41,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cabal: ["3.2"]
+        cabal: ["3.6"]
         ghc:
-          - "8.0.2"
-          - "8.2.2"
-          - "8.4.4"
-          - "8.6.5"
           - "8.8.4"
-          - "8.10.4"
+          - "8.10.7"
+        winio: [false]
+        include:
+          - ghc: "9.0.2"
+            cabal: "3.6"
+            winio: true
     steps:
       - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v1.2.7
         id: setup-haskell-cabal
         with:
           ghc-version: ${{ matrix.ghc }}
@@ -70,3 +68,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.ghc }}-
       - run: cabal v2-build
+      - if: matrix.winio
+        run: cabal v2-build --ghc-option=-with-rtsopts=--io-manager=native

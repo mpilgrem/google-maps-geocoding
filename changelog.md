@@ -1,3 +1,7 @@
+# 0.7.0.1
+
+* Update dependencies for GHC 9.0.2 and revisit upper bounds
+
 # 0.7.0.0
 
 * Add additional languages
