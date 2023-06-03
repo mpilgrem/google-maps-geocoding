@@ -1,5 +1,5 @@
 name:                google-maps-geocoding
-version:             0.7.0.1
+version:             0.7.0.2
 synopsis:            Bindings to the Google Geocoding API (formerly Maps
                      Geocoding API)
 description:         The
@@ -29,13 +29,14 @@ copyright:           Mike Pilgrem
 category:            Web
 build-type:          Simple
 extra-source-files:  changelog.md
+                     stack.yaml
 cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
   exposed-modules:     Web.Google.Geocoding
-  build-depends:       base >= 4.8 && < 4.16
-                     , aeson >= 1.1 && < 2.1
+  build-depends:       base >= 4.8 && < 4.17
+                     , aeson >= 1.1 && < 2.2
                      , google-static-maps >= 0.7 && < 0.8
                      , http-client >= 0.5 && < 0.8
                      , servant >= 0.16 && < 0.20

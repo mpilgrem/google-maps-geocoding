@@ -1,5 +1,9 @@
-resolver: lts-19.0
-packages:
-- '.'
+resolver: lts-20.23 # GHC 9.2.7
+compiler: ghc-9.2.8 # No Stackage snapshot as at 2023-06-03
+
 extra-deps:
-- google-static-maps-0.7.0.1@sha256:098b89e069096184950fdf80af9f57b2ee06b38c274f11a52a2e026100924b78,2755
+- google-static-maps-0.7.0.2@sha256:03e66dd0c26fac3baf50c38b41a050e8cba73ea26f08898c1263699b45758ada,2788
+
+flags:
+  ansi-terminal:
+    win32-2-13-1: false

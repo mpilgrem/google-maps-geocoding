@@ -1,3 +1,8 @@
+# 0.7.0.2
+
+* Update dependencies for GHC 9.2.8 and revisit upper bounds
+* Include a `stack.yaml` in `extra-source-files`
+
 # 0.7.0.1
 
 * Update dependencies for GHC 9.0.2 and revisit upper bounds
