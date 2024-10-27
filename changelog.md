@@ -1,3 +1,7 @@
+# 0.7.0.3
+
+* Update dependencies for GHC 9.4.1 to GHC 9.8.3 and revisit upper bounds
+
 # 0.7.0.2
 
 * Update dependencies for GHC 9.2.8 and revisit upper bounds
