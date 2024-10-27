@@ -4,7 +4,7 @@ Haskell bindings to the Google Geocoding API (formerly Maps Geocoding API)
 This respository has no connection with Google Inc. or its affiliates.
 
 The
-[Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/intro)
+[Google Geocoding API](https://developers.google.com/maps/documentation/geocoding)
 provides a direct way to access geocoding and reverse geocoding services via an
 HTTP request. This library provides bindings in Haskell to that API.
 
